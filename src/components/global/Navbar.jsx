@@ -1,0 +1,131 @@
+import Box from "@mui/material/Box";
+import Container from "@mui/material/Container";
+import Stack from "@mui/material/Stack";
+
+import Divider from "@mui/material/Divider";
+import Button from "@mui/material/Button";
+
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import logo from "../../assets/images/site-logo.svg";
+
+import { Link } from "react-router-dom";
+
+import { RoutePaths } from "./../../utils/enum";
+import Shared from "../../utils/shared";
+import { useMemo } from "react";
+
+import { useAuthContext } from "../../context/auth";
+import { useCartContext } from "../../context/cart";
+import { Chip } from "@mui/material";
+import profileimg from '../../assets/images/profileuser.png'
+const linkStyle = {
+  textDecoration: "none",
+};
+
+const Navbar = () => {
+  const authContext = useAuthContext();
+  const cartContext = useCartContext();
+
+  const items = useMemo(() => {
+    return Shared.NavigationItems.filter(
+      (item) =>
+        !item.access.length || item.access.includes(authContext.user.roleId)
+    );
+  }, [authContext.user]);
+
+  const logOut = () => {
+    authContext.signOut();
+  };
+
+  return (
+    <Container maxWidth="lg">
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          height: "92px",
+        }}
+      >
+        <Link
+          to={RoutePaths.BookListing}
+          style={{ display: "flex", alignItems: "center" }}
+        >
+          <img src={logo} alt="logo" style={{ width: "180px" }} />
+        </Link>
+
+        <Box sx={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        {!!authContext.user.id && <div style={{display:"flex", justifyContent:"center", alignItems:"center", gap:"10px"}}><img src={profileimg} style={{height:"30px", width:"30px"}}/><span style={{fontSize:"17px"}}>{`${authContext.user.firstName}`}</span></div>
+}
+
+          <Stack
+            direction="row"
+            spacing={1}
+            divider={<Divider orientation="vertical" flexItem />}
+          >
+            {!authContext.user.id && (
+              <>
+                <Link to={RoutePaths.Login} style={linkStyle}>
+                  <Button
+                    variant="text"
+                   
+                    sx={{ textTransform: "capitalize" }}
+                  >
+                    Login
+                  </Button>
+                </Link>
+                <Link to={RoutePaths.Register} style={linkStyle}>
+                  <Button
+                    variant="text"
+                   
+                    sx={{ textTransform: "capitalize" }}
+                  >
+                    Register
+                  </Button>
+                </Link>
+              </>
+            )}
+            {items.map((item, index) => {
+              return (
+                <Link to={item.route} style={linkStyle} key={index}>
+                  <Button
+                    variant="text"
+                
+                    sx={{ textTransform: "capitalize" }}
+                  >
+                    {item.name}
+                  </Button>
+                </Link>
+              );
+            })}
+          </Stack>
+          <Link to={RoutePaths.Cart} style={linkStyle}>
+            <Button
+              variant="outlined"
+             
+              startIcon={<ShoppingCartIcon style={{ color: "#1976d2" }} />}
+            >
+              <span style={{ color: "#1976d2", marginRight: "5px" }}>
+                {cartContext.cartData.length}
+              </span>
+              Cart
+            </Button>
+          </Link>
+          {!!authContext.user.id && (
+            <Link to="/book" style={linkStyle}>
+              <Button
+                variant="text"
+              
+                sx={{ textTransform: "capitalize" }}
+                onClick={logOut}
+              >
+                Logout
+              </Button>
+            </Link>
+          )}
+        </Box>
+      </Box>
+    </Container>
+  );
+};
+
+export default Navbar;
